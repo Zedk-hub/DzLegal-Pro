@@ -75,9 +75,24 @@ export default async function handler(req: any, res: any) {
     res.status(200).json({ text: result.text });
   } catch (error: any) {
     console.error("Vercel Serverless Gemini API error:", error);
+    const errMsg = error?.message || String(error);
+    const errStr = (JSON.stringify(error) || "") + " " + errMsg;
+    
+    let friendlyMessage = "فشلت عملية معالجة الاستشارة القانونية؛ يرجى المحاولة لاحقاً.";
+    
+    if (errStr.includes("RESOURCE_EXHAUSTED") || errStr.includes("quota") || errStr.includes("429") || errStr.includes("limit: 20")) {
+      friendlyMessage = "⚠️ موكلي الموقر، لقد تم تجاوز الحصة اليومية المجانية ومعدل الاستعلام الخاص بمفتاح الـ API لـ Gemini (محدد بـ 20 طلباً مجانياً في اليوم).\n\n💡 الحلول المتاحة:\n- يرجى مراجعة وتحديث مفتاح GEMINI_API_KEY في لوحة Secrets (أيقونة الترس الجانبية ⚙️) بمفتاح جديد أو مدفوع.\n- أو يمكنك الانتظار بضع دقائق والمحاولة مجدداً بحسب جدول القيود للتواصل مع الأستاذ الهادي الجزائري.";
+    } else if (errStr.includes("UNAVAILABLE") || errStr.includes("high demand") || errStr.includes("503") || errStr.includes("temporary")) {
+      friendlyMessage = "⚠️ موكلي الموقر، خوادم ذكاء Gemini تواجه حالياً ضغطاً كبيراً مؤقتاً في الخدمة (High Demand / Spikes in Demand).\n\n💡 يُرجى إعادة إرسال رسالتك الآن أو بعد ثوانٍ قليلة؛ فغالباً ما تزول هذه الهزات مؤقتاً وتعود الخوادم للعمل فوراً.";
+    } else if (errStr.includes("API_KEY_INVALID") || errStr.includes("invalid key") || errStr.includes("key not valid") || errStr.includes("not valid")) {
+      friendlyMessage = "⚠️ مفتاح الـ API لـ Gemini المستخدم غير معرّف أو غير صالح. يرجى تزويد التطبيق بمفتاح صحيح عبر لوحة الـ Secrets الجانبية.";
+    } else {
+      friendlyMessage = `عذراً موكلي الموقر، تعثرت المحاورة لسبب فني عارض بالخادم: ${errMsg}`;
+    }
+
     res.status(500).json({
       error: "server_error",
-      message: error?.message || "فشلت عملية معالجة الاستشارة القانونية؛ يرجى المحاولة لاحقاً."
+      message: friendlyMessage
     });
   }
 }
