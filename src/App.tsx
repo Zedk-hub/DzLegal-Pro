@@ -120,6 +120,267 @@ export default function App() {
   // State feedback banner
   const [saveBanner, setSaveBanner] = useState<boolean>(false);
 
+  // Export RAG case context and prepared technical file metadata to JSON
+  const exportToJson = () => {
+    const clientName = caseContext.includes('زكريا قدور') || caseContext.includes('Zakaria') ? 'زكريا قدور' : caseContext.includes('بلقاسم لعموري') ? 'بلقاسم لعموري' : 'غير محدد';
+    const courtName = caseContext.includes('عنابة') || caseContext.includes('Annaba') ? 'مجلس قضاء عنابة' : caseContext.includes('وهران') ? 'مجلس قضاء وهران' : 'غير محدد';
+    const exportData = {
+      appName: "بوابة الدفاع والميزان القانوني الجزائري الجنائي",
+      lawyerName: "الأستاذ الهادي الجزائري",
+      exportTime: new Date().toLocaleString('ar-DZ'),
+      clientName,
+      courtName,
+      uploadedFiles: uploadedFiles.map(f => ({ name: f.name, size: f.size, type: f.type })),
+      caseFacts: caseContext,
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `الملف_التقني_المجهز_${clientName.replace(/\s+/g, '_')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Export RAG case context and prepared technical file metadata to beautiful printable HTML report/PDF format
+  const exportToPrintableHtml = () => {
+    const clientName = caseContext.includes('زكريا قدور') || caseContext.includes('Zakaria') ? 'زكريا قدور' : caseContext.includes('بلقاسم لعموري') ? 'بلقاسم لعموري' : 'غير محدد';
+    const courtName = caseContext.includes('عنابة') || caseContext.includes('Annaba') ? 'مجلس قضاء عنابة' : caseContext.includes('وهران') ? 'مجلس قضاء وهران' : 'غير محدد';
+    const dateStr = new Date().toLocaleDateString('ar-DZ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
+    const filesListHtml = uploadedFiles.map(f => `
+      <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; font-size: 13px;">
+        <span>📄 ${f.name}</span>
+        <span style="font-size: 11px; color: #64748b; font-family: monospace;">${f.size}</span>
+      </li>
+    `).join('') || '<li style="padding: 10px 14px; color: #64748b; font-style: italic; font-size: 13px;">لا توجد ملفات مرفقة بذاكرة الـ RAG اللحظية</li>';
+
+    const htmlContent = `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>الملف التقني المجهز - القضية الجنائية للموكل ${clientName}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, system-ui;
+            background-color: #f8fafc;
+            color: #1e293b;
+            margin: 0;
+            padding: 40px 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), ... ;
+        }
+        .header {
+            border-bottom: 2px double #C19B4C;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-title h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #1a382a;
+            font-weight: 800;
+        }
+        .header-title p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            color: #64748b;
+        }
+        .emblem {
+            text-align: left;
+            font-size: 13px;
+            color: #7e461b;
+            font-weight: bold;
+            line-height: 1.6;
+        }
+        .badge {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 1px solid #fde68a;
+        }
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .meta-card {
+            background: #faf9f6;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 16px;
+        }
+        .meta-card span {
+            font-size: 11px;
+            color: #64748b;
+            display: block;
+        }
+        .meta-card strong {
+            font-size: 14px;
+            color: #1a382a;
+            display: block;
+            margin-top: 4px;
+        }
+        .section-title {
+            font-size: 16px;
+            color: #1a382a;
+            border-left: 4px solid #C19B4C;
+            padding-left: 10px;
+            margin: 30px 0 15px 0;
+            font-weight: bold;
+        }
+        .facts-content {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            line-break: anywhere;
+            line-height: 1.6;
+            color: #334155;
+        }
+        .footer {
+            margin-top: 40px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background: #1a382a;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover {
+            background: #244e36;
+        }
+        .btn-secondary {
+            background: #5b21b6;
+        }
+        .btn-secondary:hover {
+            background: #4c1d95;
+        }
+        @media print {
+            .actions {
+                display: none;
+            }
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+            .container {
+                border: none;
+                box-shadow: none;
+                padding: 0;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="actions">
+    <button class="btn" onclick="window.print()">🖨️ طباعة المستند أو الحفظ كـ PDF</button>
+    <button class="btn btn-secondary" onclick="window.close()" style="background: #475569;">❌ إغلاق النافذة</button>
+</div>
+
+<div class="container" style="max-width: 800px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 40px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);">
+    <div class="header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px double #C19B4C; padding-bottom: 20px; margin-bottom: 30px;">
+        <div class="header-title">
+            <h1 style="margin: 0; font-size: 24px; color: #1a382a; font-weight: 800;">مكتب الأستاذ الهادي الجزائري</h1>
+            <p style="margin: 5px 0 0 0; font-size: 13px; color: #64748b;">المحاماة والاستشارات القانونية المتخصصة في القضاء الجنائي ومكافحة الجرائم الإلكترونية</p>
+        </div>
+        <div class="emblem" style="text-align: left; font-size: 12px; color: #7e461b; font-weight: bold; line-height: 1.6;">
+            الجمهورية الجزائرية الديمقراطية الشعبية<br>
+            مجلس قضاء الجزائر / معتمد لدى المحكمة العليا<br>
+            تاريخ استخلاص الملف: ${dateStr}
+        </div>
+    </div>
+
+    <div class="badge" style="display: inline-block; background: #fef3c7; color: #92400e; padding: 6px 14px; border-radius: 9999px; font-size: 12px; font-weight: bold; margin-bottom: 20px; border: 1px solid #fde68a;">🛡️ الملف التقني المجهز ومستندات قضية الحال (RAG Pipe Backup)</div>
+
+    <div class="meta-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 30px;">
+        <div class="meta-card" style="background: #faf9f6; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px;">
+            <span style="font-size: 11px; color: #64748b; display: block;">الموكل صاحب الصفة:</span>
+            <strong style="font-size: 14px; color: #1a382a; display: block; margin-top: 4px;">${clientName}</strong>
+        </div>
+        <div class="meta-card" style="background: #faf9f6; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px;">
+            <span style="font-size: 11px; color: #64748b; display: block;">مجلس ومحكمة الاختصاص الإقليمي:</span>
+            <strong style="font-size: 14px; color: #1a382a; display: block; margin-top: 4px;">${courtName}</strong>
+        </div>
+    </div>
+
+    <div class="section-title" style="font-size: 16px; color: #1a382a; border-right: 4px solid #C19B4C; padding-right: 10px; margin: 30px 0 15px 0; font-weight: bold;">📂 المستندات والقرائن الملحقة بالملف اللحظي للـ RAG</div>
+    <ul style="list-style: none; padding: 0; margin: 0;">
+        ${filesListHtml}
+    </ul>
+
+    <div class="section-title" style="font-size: 16px; color: #1a382a; border-right: 4px solid #C19B4C; padding-right: 10px; margin: 30px 0 15px 0; font-weight: bold;">⚖️ وقائع وتكييف الجرم ومجرى القضية النشطة بذاكرة المحامي</div>
+    <div class="facts-content" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; font-family: monospace; font-size: 13px; white-space: pre-wrap; line-break: anywhere; line-height: 1.6; color: #334155;">${caseContext}</div>
+
+    <div class="footer" style="margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 20px; text-align: center; font-size: 12px; color: #64748b;">
+        <p>مستخلص وحفظ مؤرخ من نظام الميزان الدفاعي. يُعد كنسخة حماية للمستندات والدفاع الاحتياطي.</p>
+        <strong>مكتب الاستشارات الجنائية - الأستاذ الهادي الجزائري © 2026</strong>
+    </div>
+</div>
+
+</body>
+</html>`;
+
+    // Open a print friendly preview window/tab directly containerizing this printable HTML
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, '_blank');
+    if (!win) {
+      // If browser blocks popups, fallback to direct download of printable HTML backup
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `الملف_التقني_المجهز_${clientName.replace(/\s+/g, '_')}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
+
   // File Upload and RAG parsing
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -816,17 +1077,37 @@ export default function App() {
                   placeholder="اكتب وقائع القضية هنا بالتفصيل، كالمحكمة، والأطراف، والمبالغ، ووسائل الإكراه لتدريب المحامي..."
                 />
 
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   <button
                     type="button"
                     onClick={() => {
                       setSaveBanner(true);
                       setTimeout(() => setSaveBanner(false), 5000);
                     }}
-                    className="flex-1 bg-[#1A382A] hover:bg-[#244E36] text-white border border-[#C19B4C] text-xs font-bold py-3 px-4 rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+                    className="flex-grow bg-[#1A382A] hover:bg-[#244E36] text-white border border-[#C19B4C] text-xs font-bold py-3 px-4 rounded-xl shadow-md transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 className="h-4 w-4 text-[#C19B4C]" />
                     حفظ الوقائع وتفاصيل القضية وتلقيم ذكاء المحامي فوراً
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={exportToPrintableHtml}
+                    className="bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 text-xs font-bold py-3 px-4 rounded-xl shadow-sm transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+                    title="تصدير وحفظ كملف PDF مطبوع وجاهز"
+                  >
+                    <Printer className="h-4 w-4 text-purple-700" />
+                    تصدير ملف PDF / طباعة 🖨️
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={exportToJson}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-bold py-3 px-4 rounded-xl shadow-sm transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+                    title="تصدير كملف احتياطي بصيغة JSON"
+                  >
+                    <FileText className="h-4 w-4 text-slate-600" />
+                    تصدير كملف JSON 💾
                   </button>
                 </div>
 
@@ -836,6 +1117,15 @@ export default function App() {
                     <span>تم حفظ وحقن وقائع المستند بذاكرة المحامي بنجاح! عند محاورته، سيبني جميع الدفوع، الثغرات، واللوائح بناءً على هذه البيانات والموقع الجغرافي المعيّن حصرياً.</span>
                   </div>
                 )}
+
+                {/* Export informative banner */}
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 leading-relaxed mt-2 flex items-start gap-2.5">
+                  <ShieldAlert className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-slate-800 block mb-0.5">💡 ميزة الحفظ الاحتياطي في الميزان الجنائي:</strong>
+                    يمكنك الآن حزم وتصدير كامل «الملف التقني المجهّز» بما في ذلك كشوف حسابك، محاضر CamScanner، وسيناريوهات براءة الـ RAG التي قمت بتحريرها، وتحميلها بنقرة واحدة إما كملف <strong>PDF رسمي قابل للطباعة</strong> مع ترويسة الدفاع الجنائي للأستاذ الهادي، أو كملف <strong>JSON</strong> مرن لتخزينه كنسخة احتياطية خارج منصتنا بنجاح تام.
+                  </div>
+                </div>
 
               </div>
 
