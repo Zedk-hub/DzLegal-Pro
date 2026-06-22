@@ -1,0 +1,6 @@
+{
+  "name": "الميزان - منصة المحامي الجزائري النخبة",
+  "description": "منصة فقهية وجنائية تفاعلية مدعومة بالذكاء الاصطناعي مخصصة للقانون الجزائري وقضايا الجنح وتبييض الأموال والتوظيف الوهمي شبكة Take a Lot",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

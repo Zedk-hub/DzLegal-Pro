@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Amiri:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Amiri", Georgia, serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-gold-50: #fefcf3;
+  --color-gold-100: #fcf6e2;
+  --color-gold-200: #f7e9be;
+  --color-gold-300: #edd187;
+  --color-gold-400: #dfb252;
+  --color-gold-500: #d4952c;
+  --color-gold-600: #b97621;
+  --color-gold-700: #9a571c;
+  --color-gold-800: #7e461b;
+  --color-gold-900: #673919;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #faf9f6;
+  color: #1f2421;
+  direction: rtl; /* Set default Arabic layout */
+}
+
+/* Custom scrollbars for bento grids */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1ebd9;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4952c;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b97621;
+}
+
+/* Legal paper print style */
+.legal-paper {
+  font-family: var(--font-serif);
+  background-image: radial-gradient(#ece5d3 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
